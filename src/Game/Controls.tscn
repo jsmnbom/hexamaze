@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://assets/m5x7.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://assets/arrows.png" type="Texture" id=2]
+[ext_resource path="res://assets/mouse.png" type="Texture" id=3]
+[ext_resource path="res://assets/wasd.png" type="Texture" id=4]
+
+[sub_resource type="DynamicFont" id=1]
+size = 48
+extra_spacing_top = -5
+extra_spacing_bottom = -5
+font_data = ExtResource( 1 )
+
+[node name="Controls" type="Control"]
+margin_right = 530.0
+margin_bottom = 230.0
+
+[node name="Label" type="Label" parent="."]
+margin_left = 7.961
+margin_top = 5.97078
+margin_right = 520.961
+margin_bottom = 84.9708
+custom_fonts/font = SubResource( 1 )
+text = "Move using WASD, arrow keys
+or by holding left mouse button."
+align = 1
+
+[node name="Arrows" type="TextureRect" parent="."]
+margin_left = 222.831
+margin_top = 87.0109
+margin_right = 412.831
+margin_bottom = 210.011
+texture = ExtResource( 2 )
+
+[node name="Mouse" type="TextureRect" parent="."]
+margin_left = 438.443
+margin_top = 81.7035
+margin_right = 451.443
+margin_bottom = 108.704
+rect_scale = Vector2( 5, 5 )
+texture = ExtResource( 3 )
+
+[node name="WASD" type="TextureRect" parent="."]
+margin_left = 14.5173
+margin_top = 86.3475
+margin_right = 204.517
+margin_bottom = 209.348
+texture = ExtResource( 4 )

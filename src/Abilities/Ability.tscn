@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://assets/arrows.png" type="Texture" id=1]
+
+[sub_resource type="CircleShape2D" id=1]
+
+[node name="Ability" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="TouchScreenButton" type="TouchScreenButton" parent="."]
+position = Vector2( 222.773, 139.962 )
+normal = ExtResource( 1 )
+shape = SubResource( 1 )
