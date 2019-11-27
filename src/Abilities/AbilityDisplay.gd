@@ -14,7 +14,6 @@ var breadcrumbs_left = 0
 
 func _ready():
 	events.connect('ability_pickup', self, '_on_ability_pickup')
-	
 
 func _on_resize():
 	rect_position -= Vector2($Label.rect_size.x, size*2+$Label.rect_size.y) + Vector2(10,10)
