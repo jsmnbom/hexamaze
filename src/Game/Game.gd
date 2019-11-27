@@ -120,6 +120,7 @@ func _unhandled_input(event):
 			touch_position = event.position
 		else:
 			touches.erase(event.index)
+			return
 			
 	if event is InputEventScreenDrag:
 		if event.index == touches[-1]:

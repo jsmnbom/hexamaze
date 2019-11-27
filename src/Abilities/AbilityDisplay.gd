@@ -226,6 +226,8 @@ func _mouse_exited():
 func _gui_input(event):
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT and not event.pressed and type != null:
 		activate_ability()
+	if event is InputEventScreenTouch and not event.pressed and type != null:
+		activate_ability()
 	get_tree().set_input_as_handled()
 
 func _unhandled_input(event):
