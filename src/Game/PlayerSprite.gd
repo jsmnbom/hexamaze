@@ -12,7 +12,7 @@ func _on_resize():
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLE_FAN)
 	st.add_uv(Vector2(0, 0))
-	st.add_color(Color.from_hsv(0.25, 1, 1))
+	st.add_color(Color(1,1,1))
 	
 	st.add_vertex(Vector3(0,0,0))
 	for i in range(7):

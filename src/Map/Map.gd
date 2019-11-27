@@ -1,9 +1,12 @@
 extends Node2D
 
+var MapAbility = preload('res://src/Abilities/MapAbility.tscn')
+var Breadcrumb = preload('res://src/Abilities/Breadcrumb.tscn')
+
 const layout = [3.0 / 2.0, 0.0, sqrt(3.0) / 2.0, sqrt(3.0)]
 const layout_inv = [2.0 / 3.0, 0.0, -1.0 / 3.0, sqrt(3.0) / 3.0]
 
-var size = Vector2(100, 100)
+var size = Vector2(1, 1)
 var origin = Vector2(0, 0)
 
 var map_radius = 1
@@ -14,7 +17,9 @@ var maze_gen = MazeGen.new()
 var goal_hex
 
 onready var wall_body = $WallBody
+onready var outer_wall_body = $OuterWallBody
 var collision_shape_owner
+var outer_collision_shape_owner
 
 var light_occluders = {}
 var enabled_light_occluder_hexes = []
@@ -24,8 +29,12 @@ var vp_top_left = Vector2()
 var goal_position
 var goal_distance_size
 
+var map_abilities = []
+var breadcrumbs = []
+
 func _ready():
 	collision_shape_owner = wall_body.create_shape_owner(self)
+	outer_collision_shape_owner = outer_wall_body.create_shape_owner(self)
 
 func _physics_process(_delta):
 	var top_left_hex = pixel_to_hex(vp_top_left)
@@ -52,15 +61,22 @@ func _physics_process(_delta):
 func _on_resize():
 	var viewport_size = get_viewport().size
 	var viewport_min = min(viewport_size.x, viewport_size.y)
-	size = Vector2(viewport_min, viewport_min) / 8
+	var new_size = Vector2(viewport_min, viewport_min) / 8
+	var size_diff = new_size / size
+	size = new_size
 	
 	map_hex_size = viewport_size / Vector2(size.x/(3.0/4.0), size.y*2.0)
 	
-	commit_walls()
-	calculate_light_occluders()
+	_commit_walls()
+	_calculate_light_occluders()
 	if goal_hex:
-		commit_goal()
+		_commit_goal()
 		_calculate_goal_distance_size()
+	_commit_abilities()
+	_commit_breadcrumbs(size_diff)
+	
+	return size_diff
+	
 		
 func _calculate_goal_distance_size():
 	goal_position = hex_to_pixel(goal_hex)
@@ -82,12 +98,60 @@ func generate(_map_radius):
 	goal_hex = result[0]
 	map = result[1]
 	
-	commit_walls()
-	commit_goal()
-	calculate_light_occluders()
+	for ref in breadcrumbs:
+		var breadcrumb = ref.get_ref()
+		if breadcrumb:
+			breadcrumb.queue_free()
+	breadcrumbs = []
+	
+	_commit_walls()
+	_commit_goal()
+	_calculate_light_occluders()
 	_calculate_goal_distance_size()
+	
+	_add_abilities()
+	_commit_abilities()
 
-func calculate_light_occluders():
+func add_breadcrumb(pos, i):
+	var breadcrumb = Breadcrumb.instance()
+	breadcrumb.position = pos
+	breadcrumb.i = i
+	breadcrumbs.append(weakref(breadcrumb))
+	add_child(breadcrumb)
+	breadcrumb._on_resize()
+	
+func _commit_breadcrumbs(size_diff):
+	for ref in breadcrumbs:
+		var breadcrumb = ref.get_ref()
+		if breadcrumb:
+			breadcrumb.position *= size_diff
+			breadcrumb._on_resize()
+
+func _add_abilities():
+	for data in map_abilities:
+		var map_ability = data[1].get_ref()
+		if map_ability:
+			map_ability.queue_free()
+	map_abilities = []
+	
+	var possible_hexes = map.keys().duplicate()
+	possible_hexes.erase(goal_hex)
+	possible_hexes.erase(Vector3(0,0,0))
+	
+	var hexes = utils.rng_sample((map.size()-8)*0.1, possible_hexes)
+	for hex in hexes:
+		var map_ability = MapAbility.instance()
+		map_abilities.append([hex, weakref(map_ability)])
+		add_child(map_ability)
+
+func _commit_abilities():
+	for data in map_abilities:
+		var map_ability = data[1].get_ref()
+		if map_ability:
+			map_ability.position = hex_to_pixel(data[0])
+			map_ability._on_resize()
+
+func _calculate_light_occluders():
 	for hex in light_occluders:
 		for occ in light_occluders[hex]:
 			VisualServer.free_rid(occ[0])
@@ -101,7 +165,7 @@ func calculate_light_occluders():
 		var occs = []
 		
 		for i in range(6):
-			if map[hex][i] and not should_draw(hex, i):
+			if map[hex][i] and not _should_draw(hex, i):
 				var from = TAU / 6 * i
 				var to = TAU / 6 * (i+1)
 				
@@ -123,7 +187,8 @@ func calculate_light_occluders():
 				
 		light_occluders[hex] = occs
 
-func commit_walls():
+func _commit_walls():
+	outer_wall_body.shape_owner_clear_shapes(outer_collision_shape_owner)
 	wall_body.shape_owner_clear_shapes(collision_shape_owner)
 	
 	var st = SurfaceTool.new()
@@ -135,29 +200,63 @@ func commit_walls():
 		var center = hex_to_pixel(hex)
 		var center3 = Vector3(center.x, center.y, 0)
 		
+		var edges = [false, false, false, false, false, false]
+		if hex.x == map_radius:
+			edges[0] = true
+			edges[5] = true
+		elif hex.x == -map_radius:
+			edges[2] = true
+			edges[3] = true
+		
+		if hex.y == map_radius:
+			edges[1] = true
+			edges[2] = true
+		elif hex.y == -map_radius:
+			edges[4] = true
+			edges[5] = true
+			
+		if hex.z == map_radius:
+			edges[3] = true
+			edges[4] = true
+		elif hex.z == -map_radius:
+			edges[0] = true
+			edges[1] = true
+		
 		for i in range(6):
-			if map[hex][i] and not should_draw(hex, i):
+			if map[hex][i] and not _should_draw(hex, i):
 				var from = TAU / 6 * i
 				var to = TAU / 6 * (i+1)
 				st.add_vertex(utils.sized_vec3_from_r_vec2(from, size)+center3)
 				st.add_vertex(utils.sized_vec3_from_r_vec2(to, size)+center3)
 				
+				if not edges[i]:
+					var shape = SegmentShape2D.new()
+					shape.a = utils.sized_vec_from_r(from, size) + center
+					shape.b = utils.sized_vec_from_r(to, size) + center
+					
+					wall_body.shape_owner_add_shape(collision_shape_owner, shape)
+					
+			if edges[i]:
+				var from = TAU / 6 * i
+				var to = TAU / 6 * (i+1)
+				
 				var shape = SegmentShape2D.new()
 				shape.a = utils.sized_vec_from_r(from, size) + center
 				shape.b = utils.sized_vec_from_r(to, size) + center
 				
-				wall_body.shape_owner_add_shape(collision_shape_owner, shape)
+				outer_wall_body.shape_owner_add_shape(outer_collision_shape_owner, shape)
 		
 	var wall_mesh = st.commit()
 	$WallMesh.mesh = wall_mesh
 
-func commit_goal():
+
+func _commit_goal():
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.add_uv(Vector2(0, 0))
 	
 	for i in range(9,3,-1):
-		st.add_color(Color(0,0,0, 0.3))
+		st.add_color(Color(0,0,0, 0.15))
 		
 		st.add_vertex(Vector3(0,0,0))
 		st.add_vertex(utils.sized_vec3_from_r_vec2(TAU / 6 * 0, size*((float(i)/10))))
@@ -190,7 +289,7 @@ func commit_goal():
 	$GoalArea/Collision.shape = shape
 	$GoalArea.position = hex_to_pixel(goal_hex)
 
-func should_draw(hex, wall):
+func _should_draw(hex, wall):
 	if wall == 5:
 		return (hex.x != map_radius and hex.y != -map_radius)
 	elif wall == 0:

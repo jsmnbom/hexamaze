@@ -1,13 +1,19 @@
 extends Node2D
 
+onready var ABILITY_TYPE = $HUD/AbilityDisplay.TYPE
+
 var root
-var root_size
+var root_size = Vector2()
 var pixilation = 4
 
 var player_speed = 75
 var player_paused = true
 
-var level = 0
+var mouse_down = false
+var touch_position
+var touches = []
+
+var level = 3
 
 var debug = false
 
@@ -21,12 +27,16 @@ onready var goal_area = $GameLayer/PixilationVPC/PixilationVP/Map/GoalArea
 onready var hud = $HUD
 onready var debug_label = $HUD/DebugLabel
 onready var fade = $FadeLayer/Fade
+onready var map_walls = $GameLayer/PixilationVPC/PixilationVP/Map/WallMesh
+onready var player_light = $GameLayer/PixilationVPC/PixilationVP/Player/Light
 
 func _ready():
 	get_tree().root.connect('size_changed', self, '_on_resize')
 	_on_resize()
 	
 	goal_area.connect('body_entered', self, '_on_goal_area_body_enter')
+	
+	events.connect('ability', self, '_on_ability')
 	
 	map.generate(1)
 	hud.level = 0
@@ -50,21 +60,26 @@ func _on_resize():
 	
 	player_sprite.position = root_size / 2
 	
-	map._on_resize()
+	var size_diff = map._on_resize()
 	
 	var root_min = min(root_size.x, root_size.y)
 	player_speed = root_min / 8
 	player.size = root_min / 65 / pixilation
 	
 	player._on_resize()
+	player.position *= size_diff
 	
 func _physics_process(_delta):
 	if debug:
-		debug_label.text = 'FPS: %s\nPlayer.pos: (%s, %s)\nMap.map_radius: %s' % [Engine.get_frames_per_second(), round(player.position.x), round(player.position.y), map.map_radius]
+		var player_pos_hex = map.pixel_to_hex(player.position)
+		debug_label.text = 'FPS: %s\nPlayer.pos: (%s, %s)\nPlayer.pos.hex: (%s, %s, %s)\nMap.map_radius: %s' % [Engine.get_frames_per_second(), round(player.position.x), round(player.position.y), player_pos_hex.x, player_pos_hex.y, player_pos_hex.z, map.map_radius]
 	
 	if not player_paused:
-		if Input.is_action_pressed('mouse_move'):
+		if mouse_down:
 			var move = root.get_mouse_position() - root_size / 2
+			player.move_and_slide(move.normalized() * player_speed)
+		elif touches.size() > 0:
+			var move = touch_position - root_size / 2
 			player.move_and_slide(move.normalized() * player_speed)
 		else:
 			var velocity = Vector2()
@@ -90,9 +105,25 @@ func _physics_process(_delta):
 	hud.goal_line_x = x
 
 func _unhandled_input(event):
-	if event.is_action_pressed("debug_toggle"):
+	if event.is_action_released('debug_toggle'):
 		debug = not debug
 		debug_label.visible = debug
+	
+	if event.is_action_pressed('mouse_move'):
+		mouse_down = true
+	if event.is_action_released('mouse_move'):
+		mouse_down = false
+	
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			touches.append(event.index)
+			touch_position = event.position
+		else:
+			touches.erase(event.index)
+			
+	if event is InputEventScreenDrag:
+		if event.index == touches[-1]:
+			touch_position = event.position
 
 func next_level():
 	player_paused = true
@@ -102,7 +133,7 @@ func _next_level():
 	level += 1
 	hud.level = level
 	
-	player.position = Vector2(0,0)
+	player.position = Vector2()
 	
 	map.generate(floor((level-1)/2)+1)
 	
@@ -111,3 +142,23 @@ func _next_level():
 func _on_goal_area_body_enter(body):
 	if body == player and not player_paused:
 		next_level()
+		
+func _on_ability(msg):
+	match msg:
+		{'type': ABILITY_TYPE.WALL_WALK, 'activated': var activated}:
+			player.set_collision_mask_bit(1, !activated)
+		{'type': ABILITY_TYPE.LIGHT, 'activated': var activated}:
+			map_walls.modulate = Color(0,0,0)
+			map_walls.visible = activated
+			player_light.visible = !activated
+		{'type': ABILITY_TYPE.BREADCRUMBS, 'i': var i}:
+			map.add_breadcrumb(player.position, i)
+		{'type': ABILITY_TYPE.WALL_LOOK, 'activated': var activated}:
+			map_walls.modulate = Color(0,0,0)
+			map_walls.visible = activated
+			player_light.shadow_gradient_length = 5 if activated else 0
+		{'type': ABILITY_TYPE.WALL_SHOW, 'activated': var activated}:
+			map_walls.modulate = Color(1,1,1)
+			map_walls.visible = activated
+			
+			

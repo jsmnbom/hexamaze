@@ -21,17 +21,24 @@ _global_script_class_icons={
 [application]
 
 config/name="HexaMaze"
-run/main_scene="res://src/Game/Game.tscn"
+run/main_scene="res://src/Title/Title.tscn"
+boot_splash/image="res://assets/boot.png"
+boot_splash/bg_color=Color( 0, 0, 0, 1 )
 config/icon="res://icon.png"
 
 [autoload]
 
 utils="*res://src/utils.gd"
+events="*res://src/events.gd"
+
+[debug]
+
+gdscript/warnings/unused_signal=false
+gdscript/warnings/return_value_discarded=false
 
 [display]
 
-window/vsync/use_vsync=false
-window/stretch/mode="viewport"
+window/dpi/allow_hidpi=true
 window/stretch/aspect="expand"
 
 [importer_defaults]
@@ -93,16 +100,30 @@ debug_toggle={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777246,"unicode":0,"echo":false,"script":null)
  ]
 }
+ability={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":32,"unicode":0,"echo":false,"script":null)
+ ]
+}
+
+[input_devices]
+
+pointing/emulate_mouse_from_touch=false
 
 [layer_names]
 
 2d_physics/layer_1="Player"
 2d_physics/layer_2="Walls"
 2d_physics/layer_3="Goal"
+2d_physics/layer_4="MapAbilities"
+2d_physics/layer_5="OuterWalls"
 
 [rendering]
 
 quality/driver/driver_name="GLES2"
+quality/intended_usage/framebuffer_allocation=0
+quality/intended_usage/framebuffer_allocation.mobile=0
 vram_compression/import_etc=true
 vram_compression/import_etc2=false
+quality/shadows/filter_mode=0
 environment/default_environment="res://default_env.tres"

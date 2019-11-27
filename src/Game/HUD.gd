@@ -14,6 +14,7 @@ var difficulties = [
 func _ready():
 	get_tree().root.connect('size_changed', self, '_on_resize')
 	_on_resize()
+	
 
 func _set_level(new_level):
 	level = new_level
@@ -28,7 +29,7 @@ func get_difficulty(diff):
 		return difficulties[diff]
 	else:
 		var s = difficulties[-1]
-		for i in range(diff-difficulties.size()+1):
+		for _i in range(diff-difficulties.size()+1):
 			s += 'est'
 		return s
 
@@ -47,6 +48,10 @@ func _on_resize():
 	var s = float(get_viewport().size.x)/$Controls.rect_size.x / 4
 	$Controls.rect_scale = Vector2(s, s)
 	$Controls.rect_position = get_viewport().size - $Controls.rect_size * $Controls.rect_scale
+	
+	$AbilityDisplay.size = 35
+	$AbilityDisplay.rect_position = get_viewport().size
+	$AbilityDisplay._on_resize()
 
 func commit_goal_distance():
 	var st = SurfaceTool.new()
