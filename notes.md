@@ -5,4 +5,3 @@
 ## Todo
 
 - Music
-- Make touch friendly

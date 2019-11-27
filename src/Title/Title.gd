@@ -9,6 +9,17 @@ func _ready():
 	$Tween.interpolate_property($PressLabel, 'modulate:a', 0.0, 1.0, 1.0, Tween.TRANS_EXPO, Tween.EASE_OUT, 1.0)
 	$Tween.start()
 	
+	var version
+	var version_file = File.new()
+	if version_file.file_exists('res://VERSION'):
+		version_file.open("res://VERSION", File.READ)
+		version = version_file.get_line()
+	elif OS.is_debug_build():
+		version = 'DEBUG BUILD'
+	else:
+		version = 'ERROR: VERSION NOT FOUND'
+	OS.set_window_title('HexaMaze %s' % version)
+	
 func _on_resize():
 	var root_size = get_viewport().size
 	$BG.rect_size = root_size
