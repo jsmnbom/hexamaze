@@ -1,0 +1,32 @@
+# ⬡Maze (HexaMaze)
+
+## *Limited-visibility hexagonal maze game*
+
+## Features
+
+- Infinite randomly generated mazes
+- Increasing difficulty
+- 5 unique abilities
+- Music and sounds
+
+## Download
+
+The game can be downloaded for free on [Itch.io](https://jsmnbom.itch.io/hexamaze).
+
+*Note: no MacOSX version as I have no mac computer available for testing.*
+
+## Download
+
+The game can be downloaded for free on [Itch.io](https://jsmnbom.itch.io/potion-commotion).
+
+*Note: no MacOSX version as I have no mac computer available for testing.*
+
+## Hacking
+
+The game is created in Godot 3, and is easy to modify. Simply open the `project.godot` file using the Godot Editor. To export releases of the game the `export.py` python script can be used - it will automatically version the game according to git tags. Pull requests and issues are very welcome! :D
+
+## License
+
+The game is released under the MIT license.
+
+Game assets are released under Creative Commons Attribution_ShareAlike v4.0 International.
