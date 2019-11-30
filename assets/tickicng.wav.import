@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/tickicng.wav-36caa225172c6fd886113db11c866e48.sample"
+
+[deps]
+
+source_file="res://assets/tickicng.wav"
+dest_files=[ "res://.import/tickicng.wav-36caa225172c6fd886113db11c866e48.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=true
+edit/loop=true
+compress/mode=0

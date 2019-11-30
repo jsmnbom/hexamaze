@@ -1,5 +1,7 @@
 extends Control
 
+onready var audio = get_node('/root/HexaMaze/Audio')
+
 var size = 35
 
 enum TYPE {WALL_WALK, LIGHT, BREADCRUMBS, WALL_LOOK, WALL_SHOW}
@@ -49,6 +51,7 @@ func _on_resize():
 	
 	$ProgressBar.position = -rect_global_position
 	$ProgressBar._on_resize($Label.rect_size.y)
+	audio._on_resize($Label.rect_size.y)
 
 func _set_type(new_type):
 	if new_type == null and type != null:
@@ -73,20 +76,20 @@ func _set_type(new_type):
 		
 		match type:
 			TYPE.WALL_WALK:
-				total_time = 10.0
+				total_time = 8.0
 				breadcrumbs_left = 0
 			TYPE.LIGHT:
-				total_time = 10.0
+				total_time = 8.0
 				breadcrumbs_left = 0
 			TYPE.BREADCRUMBS:
 				total_time = 0.0
 				breadcrumbs_left = 6
 				mesh_instances[type].mesh = dots(breadcrumbs_left)
 			TYPE.WALL_LOOK:
-				total_time = 10.0
+				total_time = 8.0
 				breadcrumbs_left = 0
 			TYPE.WALL_SHOW:
-				total_time = 10.0
+				total_time = 8.0
 				breadcrumbs_left = 0
 		time_left = total_time
 
@@ -234,6 +237,7 @@ func _unhandled_input(event):
 		activate_ability()
 
 func activate_ability():
+	audio.play_activate()
 	if type == TYPE.BREADCRUMBS:
 		$ProgressBar.parts = 6
 		breadcrumbs_left -= 1
@@ -253,9 +257,11 @@ func activate_ability():
 		tween.interpolate_property($Label, 'modulate:a', 1.0, 0.0, 0.5, Tween.TRANS_CUBIC, Tween.EASE_OUT)
 		tween.start()
 		$ProgressBar.show()
+		audio.start_ticking()
 
 func _on_ability_pickup(map_ability):
 	if type == null:
+		audio.play_pickup()
 		map_ability.del()
 		self.type = utils.rng_choose(TYPE.values())
 
@@ -267,5 +273,6 @@ func _on_Timer_timeout():
 		$ProgressBar.hide()
 		events.emit_signal('ability', {'type': type, 'activated': false})
 		self.type = null
+		audio.stop_ticking()
 		
 	

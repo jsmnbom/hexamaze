@@ -1,5 +1,6 @@
 extends Node2D
 
+signal start_game
 
 func _ready():
 	get_tree().root.connect('size_changed', self, '_on_resize')
@@ -57,5 +58,5 @@ func _on_resize():
 	
 func _unhandled_input(event):
 	if event is InputEventKey or event is InputEventScreenTouch or event is InputEventMouseButton:
-		get_tree().change_scene_to(load('res://src/Game/Game.tscn'))
+		emit_signal('start_game')
 	

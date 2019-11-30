@@ -80,8 +80,8 @@ clip_text = true
 [node name="TaglineLabel" type="Label" parent="."]
 margin_left = 4.10107
 margin_top = 350.643
-margin_right = 1297.1
-margin_bottom = 430.643
+margin_right = 2573.1
+margin_bottom = 509.643
 custom_fonts/font = SubResource( 3 )
 text = "Limited-visibility hexagonal maze game"
 

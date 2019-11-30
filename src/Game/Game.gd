@@ -1,6 +1,7 @@
 extends Node2D
 
 onready var ABILITY_TYPE = $HUD/AbilityDisplay.TYPE
+onready var audio = get_node('/root/HexaMaze/Audio')
 
 var root
 var root_size = Vector2()
@@ -128,6 +129,9 @@ func _unhandled_input(event):
 
 func next_level():
 	player_paused = true
+	
+	audio.play_hole()
+	
 	fade.fade_out(1.0, [self, '_next_level'])
 	
 func _next_level():
@@ -161,5 +165,3 @@ func _on_ability(msg):
 		{'type': ABILITY_TYPE.WALL_SHOW, 'activated': var activated}:
 			map_walls.modulate = Color(1,1,1)
 			map_walls.visible = activated
-			
-			

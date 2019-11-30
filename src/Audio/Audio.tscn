@@ -1,0 +1,45 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://src/Audio/Audio.gd" type="Script" id=1]
+[ext_resource path="res://assets/bg.ogg" type="AudioStream" id=2]
+[ext_resource path="res://assets/sound_on.png" type="Texture" id=3]
+[ext_resource path="res://assets/hole.wav" type="AudioStream" id=4]
+[ext_resource path="res://assets/pickup.wav" type="AudioStream" id=5]
+[ext_resource path="res://assets/tickicng.wav" type="AudioStream" id=6]
+[ext_resource path="res://assets/activate.wav" type="AudioStream" id=7]
+
+[node name="Audio" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="BG" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 2 )
+bus = "BG"
+
+[node name="Layer" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="Toggle" type="TextureButton" parent="Layer"]
+margin_right = 32.0
+margin_bottom = 32.0
+focus_mode = 0
+mouse_default_cursor_shape = 2
+enabled_focus_mode = 0
+texture_normal = ExtResource( 3 )
+expand = true
+
+[node name="Hole" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 4 )
+bus = "SFX"
+
+[node name="Pickup" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 5 )
+bus = "SFX"
+
+[node name="Ticking" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 6 )
+bus = "SFX"
+
+[node name="Activate" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 7 )
+bus = "SFX"
+[connection signal="pressed" from="Layer/Toggle" to="." method="_on_Toggle_pressed"]

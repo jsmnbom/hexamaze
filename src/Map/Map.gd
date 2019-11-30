@@ -138,7 +138,7 @@ func _add_abilities():
 	possible_hexes.erase(goal_hex)
 	possible_hexes.erase(Vector3(0,0,0))
 	
-	var hexes = utils.rng_sample((map.size()-8)*0.1, possible_hexes)
+	var hexes = utils.rng_sample((map.size()-8)*0.05, possible_hexes)
 	for hex in hexes:
 		var map_ability = MapAbility.instance()
 		map_abilities.append([hex, weakref(map_ability)])
